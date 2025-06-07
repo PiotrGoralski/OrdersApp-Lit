@@ -11,6 +11,9 @@ export class OrdersTable extends LitElement {
     .orders-container { display: flex; justify-content: center; align-items: center; }
     .orders-table { width: 80vw; max-width: 1500px; }
     .table-row {  }
+    .close-order-button { color: white; background: crimson; border: 3px solid darkred; padding: 5px; border-radius: 5px; }
+    .close-order-button:hover { cursor: pointer }
+    .close-order-error { display: flex; justify-content: flex-end; width: 100%; }
   `;
 
   @property({ type: [] })
@@ -23,11 +26,8 @@ export class OrdersTable extends LitElement {
   replaceOrder: Function = () => console.warn('default state');
 
   _closeOrder = (orderId: string) => {
-    fetch('http://localhost:8080/orders/'+orderId+'/close', {
-      method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        }
+    fetch('http://localhost:8080/orders/'+orderId, {
+      method: 'DELETE'
     })
     .then(response => {
       if (response.ok) {
@@ -36,9 +36,8 @@ export class OrdersTable extends LitElement {
       throw new Error(`Wystąpił błąd podczas zamykania zamówienia, spróbuj ponownie`);
     })
     .then(data => {
+      data.creationDate = new Date(data.creationDate);
       this.replaceOrder(data);
-      this.shadowRoot.getElementById('description-input').value = '';
-      this.shadowRoot.getElementById('user-id-input').value = '';
       this.error = '';
     })
     .catch(error => {
@@ -49,7 +48,7 @@ export class OrdersTable extends LitElement {
   render() {
     return html`
       <Fragment>
-      ${this.error ?? html`<div>${this.error}</div>`}
+      <div class="close-order-error">${this.error ?? ''}</div>
       <div class="orders-container">
         <table class="orders-table">
           <tr>
@@ -64,11 +63,11 @@ export class OrdersTable extends LitElement {
             <tr class="table-row">
               <td>${index}</td>
               <td>${order.id}</td>
-              <td>${order.creationDate}</td>
+              <td>${order.creationDate.toLocaleDateString() + ' ' + order.creationDate.toLocaleTimeString()}</td>
               <td>${order.status}</td>
               <td>${order.description}</td>
               <td>
-                <lion-button class="close-order-button" @click=${() => this._closeOrder(order.id)}>Zamknij zamówienie</lion-button>
+                ${order.status !== 'CLOSED' ? html`<lion-button class="close-order-button" @click=${() => this._closeOrder(order.id)}>Zamknij zamówienie</lion-button>` : ''}
               </td>
             </tr>
           `)}

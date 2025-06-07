@@ -29,6 +29,16 @@ export class CreateOrderForm extends LitElement {
     const description = this.shadowRoot.getElementById('description-input').value;
     const userId = this.shadowRoot.getElementById('user-id-input').value;
 
+    if(description.trim() === '' || userId.trim() === '') {
+      this.error = 'Opis i ID użytkownika nie mogą być puste';
+      return;
+    }
+
+    if(isNaN(Number(userId))) {
+      this.error = 'ID użytkownika musi być liczbą';
+      return;
+    }
+
     fetch('http://localhost:8080/orders', {
       method: 'POST',
       headers: {
@@ -46,6 +56,7 @@ export class CreateOrderForm extends LitElement {
       throw new Error(`Wystąpił błąd, spróbuj ponownie`);
     })
     .then(data => {
+      data.creationDate = new Date(data.creationDate);
       this.addOrder(data);
       this.shadowRoot.getElementById('description-input').value = '';
       this.shadowRoot.getElementById('user-id-input').value = '';
@@ -62,7 +73,7 @@ export class CreateOrderForm extends LitElement {
         <lion-input id="description-input" label="Opis" class="order-input"></lion-input>
         <lion-input id="user-id-input" label="ID użytkownika" class="order-input"></lion-input>
         <lion-button class="save-button" @click=${this._saveOrder}>Zapisz zamówienie</lion-button>
-        ${this.error ?? html`<div>${this.error}</div>`}
+        ${this.error && html`<div>${this.error}</div>`}
       </div>
     `
   }

@@ -20,11 +20,7 @@ export class MyElement extends LitElement {
   error: string = '';
 
   @property()
-  orders: Order[] = [
-    // {id: '123', creationDate: new Date(), status: 'CREATED', description: 'Opis 1', userId: '111'},
-    // {id: '2', creationDate: new Date(), status: 'CREATED', description: 'Opis 2', userId: '555'},
-    // {id: '3', creationDate: new Date(), status: 'CLOSED', description: 'Opis 3', userId: '777'}
-  ];
+  orders: Order[] = [];
 
   async firstUpdated() {
     fetch('http://localhost:8080/orders')
@@ -35,7 +31,7 @@ export class MyElement extends LitElement {
       throw new Error(`Wystąpił błąd, spróbuj ponownie`);
     })
     .then(data => {
-      this.orders = data;
+      this.orders = data.map(order => {order.creationDate = new Date(order.creationDate); return order});
       this.error = '';
     })
     .catch(error => {
