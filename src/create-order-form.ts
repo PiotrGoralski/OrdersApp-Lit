@@ -1,11 +1,6 @@
 import {LitElement, html, css} from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
-interface OrderCreationRequest {
-  description: string;
-  userId: string;
-}
-
 @customElement('create-order-form')
 export class CreateOrderForm extends LitElement {
 
